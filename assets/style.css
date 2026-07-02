@@ -1,0 +1,426 @@
+/* ==========================================================================
+   和テイスト + 白銀比 (1 : 1.414) デザイン
+   - 余白は白銀比の等比数列 (8, 11, 16, 23, 32, 45, 64, 91px)
+   - 文字サイズは 2^(1/4) ≈ 1.189 の等比数列(白銀比の平方根)
+   - カードやヒーローの縦横比は 1:√2 (A判用紙と同じ比率)
+   - 配色は日本の伝統色: 生成り・墨・朱・藍・鈍色
+   ========================================================================== */
+
+:root {
+  /* 伝統色 */
+  --kinari: #f6f3ec;   /* 生成り: 背景 */
+  --washi: #fcfaf5;    /* 和紙: カード背景 */
+  --sumi: #2b2a28;     /* 墨: 本文 */
+  --nibi: #7c786e;     /* 鈍色: 補助テキスト */
+  --shu: #a63c2c;      /* 朱: アクセント */
+  --ai: #33566e;       /* 藍: リンク */
+  --line: #ddd6c7;     /* 罫線 */
+
+  /* 白銀比スケール: 余白 (×1.414) */
+  --s1: 8px;
+  --s2: 11px;
+  --s3: 16px;
+  --s4: 23px;
+  --s5: 32px;
+  --s6: 45px;
+  --s7: 64px;
+  --s8: 91px;
+
+  /* 白銀比スケール: 文字 (×1.189) */
+  --t0: 0.813rem;  /* 13px */
+  --t1: 0.969rem;  /* 15.5px */
+  --t2: 1rem;      /* 16px 基準 */
+  --t3: 1.189rem;  /* 19px */
+  --t4: 1.414rem;  /* 22.6px */
+  --t5: 1.682rem;  /* 26.9px */
+  --t6: 2rem;      /* 32px */
+
+  --serif: "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  --sans: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+
+  /* 本文幅: 見やすさ優先で約38字。ヘッダー幅はその白銀比倍 */
+  --measure: 43rem;
+  --wide: 60.8rem; /* 43 × 1.414 */
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--kinari);
+  /* 和紙の風合い: ごく薄い簀の目(横線)を重ねる */
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0,
+    transparent 7px,
+    rgba(43, 42, 40, 0.012) 7px,
+    rgba(43, 42, 40, 0.012) 8px
+  );
+  color: var(--sumi);
+  font-family: var(--sans);
+  font-size: var(--t2);
+  line-height: 1.9; /* 日本語の可読性優先 */
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--ai); text-decoration-color: var(--line); text-underline-offset: 3px; }
+a:hover { color: var(--shu); }
+
+img { max-width: 100%; height: auto; }
+
+/* --------------------------------------------------------- ヘッダー */
+
+.site-header,
+.post-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--washi);
+  position: relative;
+}
+
+/* 朱の一本線: 上端のアクセント */
+.site-header::before,
+.post-header::before {
+  content: "";
+  display: block;
+  height: 4px;
+  background: var(--shu);
+}
+
+.header-inner {
+  max-width: var(--wide);
+  margin: 0 auto;
+  padding: var(--s7) var(--s4) var(--s6);
+}
+
+/* 落款風の一文字 */
+.site-crest {
+  display: inline-grid;
+  place-items: center;
+  width: var(--s6);
+  height: var(--s6);
+  margin: 0 0 var(--s3);
+  border: 1.5px solid var(--shu);
+  border-radius: 2px;
+  color: var(--shu);
+  font-family: var(--serif);
+  font-size: var(--t4);
+  font-weight: 600;
+}
+
+.site-title {
+  margin: 0 0 var(--s4);
+  font-family: var(--serif);
+  font-size: var(--t6);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.site-intro {
+  max-width: var(--measure);
+  color: var(--nibi);
+  font-size: var(--t1);
+}
+.site-intro p { margin: 0 0 var(--s2); }
+.site-intro ul { margin: 0; padding-left: 1.4em; }
+
+/* --------------------------------------------------------- 本文容器 */
+
+.container {
+  max-width: var(--wide);
+  margin: 0 auto;
+  padding: var(--s6) var(--s4) var(--s8);
+}
+
+/* ------------------------------------------------------ 絞り込みボタン */
+
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-bottom: var(--s6);
+}
+
+.filter-btn {
+  padding: var(--s1) var(--s4);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--washi);
+  color: var(--sumi);
+  font-family: var(--serif);
+  font-size: var(--t1);
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.filter-btn:hover { border-color: var(--shu); color: var(--shu); }
+.filter-btn.is-active {
+  background: var(--shu);
+  border-color: var(--shu);
+  color: var(--washi);
+}
+
+/* --------------------------------------------------------- カード一覧 */
+
+.card-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* カード幅も白銀比: 最小 16rem × 1.414 ≈ 22.6rem */
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  gap: var(--s4);
+}
+
+.card {
+  background: var(--washi);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  transition: box-shadow 0.25s, transform 0.25s, border-color 0.25s;
+}
+.card:hover {
+  border-color: var(--shu);
+  box-shadow: 0 var(--s1) var(--s4) rgba(43, 42, 40, 0.08);
+  transform: translateY(-2px);
+}
+
+.card-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--s4);
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s2);
+  color: var(--nibi);
+  font-size: var(--t0);
+  letter-spacing: 0.05em;
+}
+
+.genre-chip {
+  padding: 1px var(--s2);
+  border: 1px solid var(--shu);
+  border-radius: 2px;
+  color: var(--shu);
+  font-family: var(--serif);
+  font-size: var(--t0);
+  letter-spacing: 0.15em;
+}
+
+.card-title {
+  margin: 0 0 var(--s2);
+  font-family: var(--serif);
+  font-size: var(--t3);
+  font-weight: 600;
+  line-height: 1.55; /* 1.414 より少し広く: 可読性優先 */
+}
+.card:hover .card-title { color: var(--shu); }
+
+.card-excerpt {
+  margin: 0 0 var(--s3);
+  color: var(--nibi);
+  font-size: var(--t1);
+  line-height: 1.8;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  border-top: 1px dashed var(--line);
+  padding-top: var(--s2);
+}
+
+.card-keywords { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.tag {
+  padding: 0 var(--s1);
+  background: var(--kinari);
+  border-radius: 2px;
+  color: var(--nibi);
+  font-size: var(--t0);
+}
+
+.views {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--nibi);
+  font-size: var(--t0);
+  white-space: nowrap;
+}
+
+.no-match {
+  color: var(--nibi);
+  text-align: center;
+  padding: var(--s7) 0;
+  font-family: var(--serif);
+}
+
+/* --------------------------------------------------------- 記事ページ */
+
+.post-header .header-inner { max-width: var(--measure); }
+
+.breadcrumb { margin-bottom: var(--s4); font-size: var(--t1); }
+.breadcrumb a { text-decoration: none; color: var(--nibi); }
+.breadcrumb a:hover { color: var(--shu); }
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  color: var(--nibi);
+  font-size: var(--t0);
+  margin-bottom: var(--s3);
+}
+
+.post-title {
+  margin: 0 0 var(--s3);
+  font-family: var(--serif);
+  font-size: var(--t5);
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+}
+
+.post-keywords { margin: 0; display: flex; flex-wrap: wrap; gap: var(--s1); }
+
+.post-body {
+  max-width: var(--measure);
+  margin: 0 auto;
+}
+
+.post-body h2,
+.post-body h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  line-height: 1.6;
+  margin: var(--s6) 0 var(--s3);
+  padding-left: var(--s3);
+  border-left: 4px solid var(--shu);
+}
+.post-body h2 { font-size: var(--t4); }
+.post-body h3 { font-size: var(--t3); }
+.post-body h4 { font-size: var(--t2); margin: var(--s5) 0 var(--s2); }
+
+.post-body p { margin: 0 0 var(--s3); }
+
+.post-body ul,
+.post-body ol {
+  margin: 0 0 var(--s3);
+  padding-left: 1.6em;
+}
+.post-body li { margin-bottom: var(--s1); }
+
+.post-body blockquote {
+  margin: var(--s4) 0;
+  padding: var(--s3) var(--s4);
+  background: var(--washi);
+  border-left: 3px solid var(--line);
+  border-radius: 0 3px 3px 0;
+  color: #4c4a45;
+  font-family: var(--serif);
+}
+.post-body blockquote p:last-child { margin-bottom: 0; }
+
+.post-body code {
+  padding: 2px 6px;
+  background: #edeade;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: Consolas, "Courier New", monospace;
+}
+
+.post-body pre {
+  margin: var(--s4) 0;
+  padding: var(--s4);
+  background: #2e2d2b;
+  color: #f0ede4;
+  border-radius: 4px;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+.post-body pre code { background: none; padding: 0; color: inherit; }
+
+.post-body img {
+  display: block;
+  margin: var(--s4) auto;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.post-body table {
+  border-collapse: collapse;
+  margin: var(--s4) 0;
+  width: 100%;
+  font-size: var(--t1);
+}
+.post-body th,
+.post-body td {
+  border: 1px solid var(--line);
+  padding: var(--s2) var(--s3);
+  text-align: left;
+}
+.post-body th { background: var(--washi); font-family: var(--serif); }
+
+.post-body hr {
+  border: none;
+  border-top: 1px dashed var(--line);
+  margin: var(--s6) 0;
+}
+
+.post-nav {
+  max-width: var(--measure);
+  margin: var(--s7) auto 0;
+  padding-top: var(--s4);
+  border-top: 1px solid var(--line);
+  font-size: var(--t1);
+}
+.post-nav a { text-decoration: none; }
+
+/* --------------------------------------------------------- フッター */
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  background: var(--washi);
+  text-align: center;
+  padding: var(--s6) var(--s4);
+  color: var(--nibi);
+  font-size: var(--t0);
+}
+
+.footer-mark {
+  display: inline-grid;
+  place-items: center;
+  width: var(--s5);
+  height: var(--s5);
+  margin: 0 0 var(--s2);
+  border: 1px solid var(--nibi);
+  border-radius: 50%;
+  font-family: var(--serif);
+  font-size: var(--t1);
+}
+.site-footer p { margin: 0; }
+
+/* --------------------------------------------------------- モバイル */
+
+@media (max-width: 600px) {
+  .header-inner { padding: var(--s5) var(--s3) var(--s4); }
+  .container { padding: var(--s4) var(--s3) var(--s7); }
+  .site-title { font-size: var(--t5); }
+  .post-title { font-size: var(--t4); }
+  .card-list { grid-template-columns: 1fr; }
+}

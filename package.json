@@ -1,0 +1,16 @@
+{
+  "name": "cms_2026",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node watch.mjs",
+    "watch:deploy": "node watch.mjs --deploy",
+    "preview": "npx wrangler pages dev public",
+    "deploy": "node build.mjs && npx wrangler pages deploy public"
+  },
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "marked": "^15.0.7"
+  }
+}

@@ -1,0 +1,8 @@
+# Cloudflare Pages 設定
+name = "cms-2026"
+compatibility_date = "2026-05-01"
+pages_build_output_dir = "public"
+
+[[kv_namespaces]]
+binding = "VIEWS"
+id = "f798d48dbb204963b5ec1de6e98bb431"
