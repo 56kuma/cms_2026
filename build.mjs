@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
+import { addHeadingIds, tocFromHeadings } from './lib/toc.mjs';
+import { rankPosts } from './lib/ranking.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const POSTS_DIR = path.resolve(ROOT, '..', 'bashcms2_contents', 'posts');
@@ -82,6 +84,7 @@ function loadPosts() {
     const dateMatch = dir.name.match(/^(\d{8})_?(.*)$/);
     const date = fmtDate(dateMatch ? dateMatch[1] : '19700101');
     const { title, body } = extractTitle(bodyWithTitle, dir.name);
+    const { html, headings } = addHeadingIds(marked.parse(body));
 
     posts.push({
       slug: dir.name,
@@ -92,7 +95,8 @@ function loadPosts() {
       genre: detectGenre(keywords),
       copyright: meta.copyright || '',
       excerpt: makeExcerpt(body),
-      html: marked.parse(body),
+      html,
+      toc: tocFromHeadings(headings),
     });
   }
   posts.sort((a, b) => b.date.iso.localeCompare(a.date.iso));
@@ -171,18 +175,28 @@ function renderIndex(posts, introHtml) {
   </div>
 </header>
 
-<main class="container">
-  <nav class="filter" aria-label="ジャンル絞り込み">
-    ${filterButtons}
-  </nav>
+<main class="container index-layout">
+  <div class="index-main">
+    <nav class="filter" aria-label="ジャンル絞り込み">
+      ${filterButtons}
+    </nav>
 
-  <ul class="card-list" id="cardList">
+    <ul class="card-list" id="cardList">
 ${cards}
-  </ul>
-  <p class="no-match" id="noMatch" hidden>該当する記事がありません。</p>
+    </ul>
+    <p class="no-match" id="noMatch" hidden>該当する記事がありません。</p>
+  </div>
+
+  <aside class="ranking" id="ranking" aria-label="アクセスランキング" hidden>
+    <h2 class="ranking-title">アクセスランキング</h2>
+    <ol class="ranking-list" id="rankingList"></ol>
+  </aside>
 </main>
 
 <script>
+// 記事タイトル一覧(ランキング表示用)とランキング関数(lib/ranking.mjs と同一実装)
+var POSTS = ${JSON.stringify(Object.fromEntries(posts.map((p) => [p.slug, esc(p.title)])))};
+var rankPosts = ${rankPosts.toString()};
 (function () {
   // ジャンル絞り込み
   var buttons = document.querySelectorAll('.filter-btn');
@@ -215,11 +229,40 @@ ${cards}
         el.hidden = false;
       }
     });
+
+    // アクセスランキング(上位5件・漢数字)
+    var KANJI = ['一', '二', '三', '四', '五'];
+    var list = document.getElementById('rankingList');
+    rankPosts(counts, 5).forEach(function (r, i) {
+      var title = POSTS[r.slug];
+      if (!title) return; // 削除済み記事の閲覧数が残っている場合は飛ばす
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="rank-no">' + KANJI[i] + '</span>' +
+        '<a href="posts/' + encodeURIComponent(r.slug) + '/">' + title + '</a>' +
+        '<span class="rank-views">' + r.count.toLocaleString() + '</span>';
+      list.appendChild(li);
+    });
+    if (list.children.length) document.getElementById('ranking').hidden = false;
   }).catch(function () {});
 })();
 </script>`;
 
   return layout({ title: SITE.title, description: SITE.description, bodyClass: 'page-index', content });
+}
+
+function renderToc(toc) {
+  if (!toc.length) return '';
+  // 記事内の最上位レベルを基準に、それより深い見出しだけ字下げする
+  const minLevel = Math.min(...toc.map((h) => h.level));
+  const items = toc
+    .map((h) => `<li${h.level > minLevel ? ' class="toc-sub"' : ''}><a href="#${h.id}">${esc(h.text)}</a></li>`)
+    .join('\n      ');
+  return `<nav class="toc" aria-label="目次">
+    <p class="toc-title">目次</p>
+    <ol class="toc-list">
+      ${items}
+    </ol>
+  </nav>`;
 }
 
 function renderPost(post) {
@@ -237,7 +280,8 @@ function renderPost(post) {
   </div>
 </header>
 
-<main class="container">
+<main class="container post-layout">
+  ${renderToc(post.toc)}
   <article class="post-body">
 ${post.html}
   </article>
