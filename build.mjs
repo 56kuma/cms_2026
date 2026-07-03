@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
 import { addHeadingIds, tocFromHeadings } from './lib/toc.mjs';
 import { rankPosts } from './lib/ranking.mjs';
-import { extractAsin, coverUrl } from './lib/cover.mjs';
+import { resolveCover } from './lib/cover.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const POSTS_DIR = path.resolve(ROOT, '..', 'bashcms2_contents', 'posts');
@@ -29,6 +29,7 @@ function esc(s) {
 }
 
 function parseFrontmatter(raw) {
+  raw = raw.replace(/^\uFEFF/, ''); // BOM付きUTF-8でもフロントマターを認識できるように
   const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!m) return { meta: {}, body: raw };
   const meta = {};
@@ -87,7 +88,12 @@ function loadPosts() {
     const { title, body } = extractTitle(bodyWithTitle, dir.name);
     const { html, headings } = addHeadingIds(marked.parse(body));
     const genre = detectGenre(keywords);
-    const asin = genre === '書籍' ? extractAsin(body) : null;
+    const cover = resolveCover({
+      cover: meta.cover,
+      body,
+      genre,
+      baseUrl: `posts/${encodeURIComponent(dir.name)}/`,
+    });
 
     posts.push({
       slug: dir.name,
@@ -98,7 +104,7 @@ function loadPosts() {
       genre,
       copyright: meta.copyright || '',
       excerpt: makeExcerpt(body),
-      cover: asin ? coverUrl(asin) : null,
+      cover,
       html,
       toc: tocFromHeadings(headings),
     });
