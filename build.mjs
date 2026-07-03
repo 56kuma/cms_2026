@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
 import { addHeadingIds, tocFromHeadings } from './lib/toc.mjs';
 import { rankPosts } from './lib/ranking.mjs';
+import { extractAsin, coverUrl } from './lib/cover.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const POSTS_DIR = path.resolve(ROOT, '..', 'bashcms2_contents', 'posts');
@@ -85,6 +86,8 @@ function loadPosts() {
     const date = fmtDate(dateMatch ? dateMatch[1] : '19700101');
     const { title, body } = extractTitle(bodyWithTitle, dir.name);
     const { html, headings } = addHeadingIds(marked.parse(body));
+    const genre = detectGenre(keywords);
+    const asin = genre === '書籍' ? extractAsin(body) : null;
 
     posts.push({
       slug: dir.name,
@@ -92,9 +95,10 @@ function loadPosts() {
       title,
       date,
       keywords,
-      genre: detectGenre(keywords),
+      genre,
       copyright: meta.copyright || '',
       excerpt: makeExcerpt(body),
+      cover: asin ? coverUrl(asin) : null,
       html,
       toc: tocFromHeadings(headings),
     });
@@ -151,8 +155,13 @@ function renderIndex(posts, introHtml) {
         <time datetime="${p.date.iso}">${p.date.disp}</time>
         <span class="genre-chip">${esc(p.genre)}</span>
       </div>
-      <h2 class="card-title">${esc(p.title)}</h2>
-      <p class="card-excerpt">${esc(p.excerpt)}</p>
+      <div class="card-mid">
+        <div class="card-text">
+          <h2 class="card-title">${esc(p.title)}</h2>
+          <p class="card-excerpt">${esc(p.excerpt)}</p>
+        </div>
+        ${p.cover ? `<img class="card-cover" src="${p.cover}" alt="" loading="lazy" onerror="this.remove()" onload="if(this.naturalWidth<2)this.remove()">` : ''}
+      </div>
       <div class="card-foot">
         <span class="card-keywords">${p.keywords.slice(0, 4).map((k) => `<span class="tag">${esc(k)}</span>`).join('')}</span>
         <span class="views" data-views="${esc(p.slug)}" hidden><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M8 3C4.5 3 1.7 5.4.5 8c1.2 2.6 4 5 7.5 5s6.3-2.4 7.5-5C14.3 5.4 11.5 3 8 3zm0 8.3A3.3 3.3 0 1 1 8 4.7a3.3 3.3 0 0 1 0 6.6zM8 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg><span class="views-num"></span></span>

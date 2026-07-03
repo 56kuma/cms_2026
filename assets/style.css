@@ -214,6 +214,27 @@ img { max-width: 100%; height: auto; }
   letter-spacing: 0.15em;
 }
 
+/* タイトル+抜粋と、書籍の表紙を横並びに */
+.card-mid {
+  display: flex;
+  gap: var(--s3);
+  margin-bottom: var(--s3);
+}
+
+.card-text { flex: 1; min-width: 0; }
+
+/* 表紙: 白銀比スケールの隣接ペア(幅91px, 縦横比 1:1.414) */
+.card-cover {
+  flex-shrink: 0;
+  align-self: flex-start; /* flexのstretchで縦に伸びると白銀比が崩れるため */
+  width: var(--s8);
+  aspect-ratio: 1 / 1.414;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--kinari);
+}
+
 .card-title {
   margin: 0 0 var(--s2);
   font-family: var(--serif);
@@ -224,7 +245,7 @@ img { max-width: 100%; height: auto; }
 .card:hover .card-title { color: var(--shu); }
 
 .card-excerpt {
-  margin: 0 0 var(--s3);
+  margin: 0;
   color: var(--nibi);
   font-size: var(--t1);
   line-height: 1.8;
